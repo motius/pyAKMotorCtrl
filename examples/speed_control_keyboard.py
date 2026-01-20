@@ -2,6 +2,7 @@ import can
 import sys
 import tty
 import termios
+import select
 from pyakmotorctrl import AK60_6Motor
 
 
@@ -22,28 +23,36 @@ def main() -> None:
 
     try:
         tty.setraw(fd)
-        while True:
-            ch = sys.stdin.read(1)
+        running = True
 
-            if ch == '\x1b':
-                ch2 = sys.stdin.read(2)
-                if ch2 == '[A':
-                    current_speed += 1
-                    motor.set_velocity(current_speed)
-                    print(f"\rCurrent speed: {current_speed} RPM    ", end='', flush=True)
-                elif ch2 == '[B':
-                    current_speed -= 1
-                    motor.set_velocity(current_speed)
-                    print(f"\rCurrent speed: {current_speed} RPM    ", end='', flush=True)
-            elif ch == 'q' or ch == 'Q':
-                print("\n\nStopping motor...")
-                motor.set_velocity(0)
-                break
+        while running:
+            motor.set_velocity(current_speed)
+
+            if select.select([sys.stdin], [], [], 0.05)[0]:
+                ch = sys.stdin.read(1)
+
+                if ch == "\x1b":
+                    ch2 = sys.stdin.read(2)
+                    if ch2 == "[A":
+                        current_speed += 1
+                        print(
+                            f"\rCurrent speed: {current_speed} RPM    ", end="", flush=True
+                        )
+                    elif ch2 == "[B":
+                        current_speed -= 1
+                        print(
+                            f"\rCurrent speed: {current_speed} RPM    ", end="", flush=True
+                        )
+                elif ch == "q" or ch == "Q":
+                    print("\n\nStopping motor...")
+                    motor.set_velocity(0)
+                    running = False
 
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
     bus.shutdown()
+    print("Exited.")
 
 
 if __name__ == "__main__":
