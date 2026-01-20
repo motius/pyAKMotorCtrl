@@ -34,17 +34,21 @@ def main() -> None:
                 if ch == "\x1b":
                     ch2 = sys.stdin.read(2)
                     if ch2 == "[A":
-                        current_speed += 1
+                        current_speed += 10
                         print(
-                            f"\rCurrent speed: {current_speed} RPM    ", end="", flush=True
+                            f"\rCurrent speed: {current_speed} RPM    ",
+                            end="",
+                            flush=True,
                         )
                     elif ch2 == "[B":
-                        current_speed -= 1
+                        current_speed -= 10
                         print(
-                            f"\rCurrent speed: {current_speed} RPM    ", end="", flush=True
+                            f"\rCurrent speed: {current_speed} RPM    ",
+                            end="",
+                            flush=True,
                         )
                 elif ch == "q" or ch == "Q":
-                    print("\n\nStopping motor...")
+                    print("\n\n\rStopping motor...")
                     motor.set_velocity(0)
                     running = False
 
@@ -52,7 +56,7 @@ def main() -> None:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
     bus.shutdown()
-    print("Exited.")
+    print("\rExited.")
 
 
 if __name__ == "__main__":
