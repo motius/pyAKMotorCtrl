@@ -90,7 +90,7 @@ class AK60_6Motor:
             return None
 
         position = struct.unpack(">h", msg.data[0:2])[0] * 0.1
-        speed = struct.unpack(">h", msg.data[2:4])[0] * 10.0
+        speed = struct.unpack(">h", msg.data[2:4])[0] * 10.0 / 80.0
         current = struct.unpack(">h", msg.data[4:6])[0] * 0.01
         temperature = struct.unpack("b", msg.data[6:7])[0]
         error_code = msg.data[7]

@@ -30,7 +30,7 @@ def main() -> None:
             status = motor.read_status()
             if status:
                 print(
-                    f"\rTarget: {current_speed} RPM, Speed: {status['speed']:.0f} ERPM",
+                    f"\rTarget: {current_speed} RPM, Speed: {status['speed']:.0f} RPM",
                     end="",
                     flush=True,
                 )

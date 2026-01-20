@@ -123,7 +123,7 @@ def test_read_status(motor, mock_bus):
     status = motor.read_status()
     assert status is not None
     assert status["position"] == pytest.approx(180.0)
-    assert status["speed"] == pytest.approx(10000.0)
+    assert status["speed"] == pytest.approx(125.0)  # 1000 * 10.0 / 80.0 = 125.0 RPM
     assert status["current"] == pytest.approx(5.0)
     assert status["temperature"] == 25
     assert status["error_code"] == 0
