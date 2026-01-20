@@ -27,6 +27,9 @@ def main() -> None:
 
         while running:
             motor.set_velocity(current_speed)
+            status = motor.read_status()
+            if status:
+                print(f"\rTarget: {current_speed} RPM | Position: {status['position']:.1f}° | Speed: {status['speed']:.0f} ERPM | Current: {status['current']:.2f} A | Temp: {status['temperature']}°C    ", end="", flush=True)
 
             if select.select([sys.stdin], [], [], 0.05)[0]:
                 ch = sys.stdin.read(1)
@@ -35,18 +38,8 @@ def main() -> None:
                     ch2 = sys.stdin.read(2)
                     if ch2 == "[A":
                         current_speed += 10
-                        print(
-                            f"\rCurrent speed: {current_speed} RPM    ",
-                            end="",
-                            flush=True,
-                        )
                     elif ch2 == "[B":
                         current_speed -= 10
-                        print(
-                            f"\rCurrent speed: {current_speed} RPM    ",
-                            end="",
-                            flush=True,
-                        )
                 elif ch == "q" or ch == "Q":
                     print("\n\n\rStopping motor...")
                     motor.set_velocity(0)

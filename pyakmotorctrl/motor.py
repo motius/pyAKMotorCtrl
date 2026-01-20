@@ -51,7 +51,7 @@ class AK60_6Motor:
         self._send_command(ServoMode.CURRENT_BRAKE, data)
 
     def set_velocity(self, rpm: float) -> None:
-        value = int(rpm)
+        value = int(rpm * 80.0)
         data = struct.pack(">i", value)
         self._send_command(ServoMode.VELOCITY_LOOP, data)
 
