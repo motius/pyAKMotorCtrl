@@ -1,6 +1,8 @@
 import can
+import sys
+import tty
+import termios
 from pyakmotorctrl import AK60_6Motor
-from pynput import keyboard
 
 
 def main() -> None:
@@ -12,29 +14,34 @@ def main() -> None:
     print("Speed Control Example")
     print("Up Arrow: Increase speed by 1 RPM")
     print("Down Arrow: Decrease speed by 1 RPM")
-    print("ESC: Exit")
+    print("q: Exit")
     print(f"\nCurrent speed: {current_speed} RPM")
 
-    def on_press(key):
-        nonlocal current_speed
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
 
-        if key == keyboard.Key.up:
-            current_speed += 1
-            motor.set_velocity(current_speed)
-            print(f"Current speed: {current_speed} RPM")
+    try:
+        tty.setraw(fd)
+        while True:
+            ch = sys.stdin.read(1)
 
-        elif key == keyboard.Key.down:
-            current_speed -= 1
-            motor.set_velocity(current_speed)
-            print(f"Current speed: {current_speed} RPM")
+            if ch == '\x1b':
+                ch2 = sys.stdin.read(2)
+                if ch2 == '[A':
+                    current_speed += 1
+                    motor.set_velocity(current_speed)
+                    print(f"\rCurrent speed: {current_speed} RPM    ", end='', flush=True)
+                elif ch2 == '[B':
+                    current_speed -= 1
+                    motor.set_velocity(current_speed)
+                    print(f"\rCurrent speed: {current_speed} RPM    ", end='', flush=True)
+            elif ch == 'q' or ch == 'Q':
+                print("\n\nStopping motor...")
+                motor.set_velocity(0)
+                break
 
-        elif key == keyboard.Key.esc:
-            print("\nStopping motor...")
-            motor.set_velocity(0)
-            return False
-
-    with keyboard.Listener(on_press=on_press) as listener:
-        listener.join()
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
     bus.shutdown()
 
