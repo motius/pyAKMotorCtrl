@@ -29,7 +29,11 @@ def main() -> None:
             motor.set_velocity(current_speed)
             status = motor.read_status()
             if status:
-                print(f"\rTarget: {current_speed} RPM | Position: {status['position']:.1f}° | Speed: {status['speed']:.0f} ERPM | Current: {status['current']:.2f} A | Temp: {status['temperature']}°C    ", end="", flush=True)
+                print(
+                    f"\rTarget: {current_speed} RPM, Speed: {status['speed']:.0f} ERPM",
+                    end="",
+                    flush=True,
+                )
 
             if select.select([sys.stdin], [], [], 0.05)[0]:
                 ch = sys.stdin.read(1)
