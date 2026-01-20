@@ -79,7 +79,14 @@ class AK60_6Motor:
 
     def read_status(self, timeout: Optional[float] = 0.1) -> Optional[dict]:
         msg = self.bus.recv(timeout=timeout)
-        if msg is None or len(msg.data) < 8:
+        if msg is None:
+            return None
+
+        # Check if message is from this motor (lower byte of arbitration ID should match motor_id)
+        if (msg.arbitration_id & 0xFF) != self.motor_id:
+            return None
+
+        if len(msg.data) < 8:
             return None
 
         position = struct.unpack(">h", msg.data[0:2])[0] * 0.1

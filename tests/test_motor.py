@@ -65,7 +65,7 @@ def test_set_brake_current_validation(motor):
 
 def test_set_velocity(motor, mock_bus):
     motor.set_velocity(1000.0)
-    expected_data = struct.pack(">i", 1000)
+    expected_data = struct.pack(">i", 80000)
     expected_id = (ServoMode.VELOCITY_LOOP << 8) | 0x68
     msg = mock_bus.send.call_args[0][0]
     assert msg.arbitration_id == expected_id
@@ -117,6 +117,7 @@ def test_read_status(motor, mock_bus):
     test_data = struct.pack(">hhh", 1800, 1000, 500) + bytes([25, 0])
     mock_msg = Mock()
     mock_msg.data = test_data
+    mock_msg.arbitration_id = 0x68  # Match motor_id from fixture
     mock_bus.recv.return_value = mock_msg
 
     status = motor.read_status()
@@ -130,5 +131,16 @@ def test_read_status(motor, mock_bus):
 
 def test_read_status_timeout(motor, mock_bus):
     mock_bus.recv.return_value = None
+    status = motor.read_status()
+    assert status is None
+
+
+def test_read_status_wrong_motor(motor, mock_bus):
+    test_data = struct.pack(">hhh", 1800, 1000, 500) + bytes([25, 0])
+    mock_msg = Mock()
+    mock_msg.data = test_data
+    mock_msg.arbitration_id = 0x99  # Different motor ID
+    mock_bus.recv.return_value = mock_msg
+
     status = motor.read_status()
     assert status is None
